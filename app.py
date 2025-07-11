@@ -1,7 +1,7 @@
 import streamlit as st
 import math
 import datetime
-from zoneinfo import ZoneInfo
+import zoneinfo
 import random
 
 # Julian Date calculation
@@ -99,14 +99,14 @@ st.title("Vedic Astrology Fun Descriptor")
 
 birth_date = st.date_input("Birth Date", min_value=datetime.date(1900, 1, 1), max_value=datetime.date(2100, 12, 31))
 birth_time = st.time_input("Birth Time (Local)")
-timezones = sorted(ZoneInfo.available_timezones())
+timezones = sorted(zoneinfo.available_timezones())
 timezone = st.selectbox("Timezone", timezones, index=timezones.index("UTC") if "UTC" in timezones else 0)
 
 if st.button("Generate Description"):
     local_dt = datetime.datetime.combine(birth_date, birth_time)
-    local_tz = ZoneInfo(timezone)
+    local_tz = zoneinfo.ZoneInfo(timezone)
     local_dt = local_dt.replace(tzinfo=local_tz)
-    utc_dt = local_dt.astimezone(ZoneInfo("UTC"))
+    utc_dt = local_dt.astimezone(zoneinfo.ZoneInfo("UTC"))
     year, month, day = utc_dt.year, utc_dt.month, utc_dt.day
     hour, minute = utc_dt.hour, utc_dt.minute
     jd = julian_date(year, month, day, hour, minute)
