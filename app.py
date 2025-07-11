@@ -39,51 +39,31 @@ def calculate_sun_longitude(d):
     lonsun = (v + w) % 360
     return lonsun
 
-# Calculate Moon's ecliptic longitude with perturbations
+# Improved Moon's ecliptic longitude calculation
 def calculate_moon_longitude(d):
-    N = (125.1228 - 0.0529538083 * d) % 360
-    i = 5.1454
-    w = (318.0634 + 0.1643573223 * d) % 360
-    a = 60.2666  # Earth radii
-    e = 0.054900
-    M = (115.3654 + 13.0649929509 * d) % 360  # Mm
-    Mrad = math.radians(M)
-    E = M + math.degrees(e * math.sin(Mrad) * (1.0 + e * math.cos(Mrad)))
-    Erad = math.radians(E)
-    xv = a * (math.cos(Erad) - e)
-    yv = a * (math.sqrt(1.0 - e*e) * math.sin(Erad))
-    v = math.degrees(math.atan2(yv, xv))
-    r = math.sqrt(xv*xv + yv*yv)
-    Nr = math.radians(N)
-    vr = math.radians(v + w)
-    ir = math.radians(i)
-    xh = r * (math.cos(Nr) * math.cos(vr) - math.sin(Nr) * math.sin(vr) * math.cos(ir))
-    yh = r * (math.sin(Nr) * math.cos(vr) + math.cos(Nr) * math.sin(vr) * math.cos(ir))
-    lonecl = math.degrees(math.atan2(yh, xh)) % 360
-    
-    # Perturbations
-    Ms = (356.0470 + 0.9856002585 * d) % 360
-    Msr = math.radians(Ms)
-    Nm = (125.1228 - 0.0529538083 * d) % 360
-    ws = 282.9404 + 4.70935e-5 * d
-    Ls = (Ms + ws) % 360
-    Lm = (M + w + N) % 360
-    Dr = math.radians(Lm - Ls)
-    Fr = math.radians(Lm - Nm)
-    Mr = math.radians(M)
-    E_pert = -1.274 * math.sin(Mr - 2*Dr)  # degrees
-    E_pert += 0.658 * math.sin(2*Dr)
-    E_pert -= 0.186 * math.sin(Msr)
-    E_pert -= 0.059 * math.sin(2*Mr - 2*Dr)
-    E_pert -= 0.057 * math.sin(Mr - 2*Dr + Msr)
-    E_pert += 0.053 * math.sin(Mr + 2*Dr)
-    E_pert += 0.046 * math.sin(2*Dr - Msr)
-    E_pert += 0.041 * math.sin(Mr - Msr)
-    E_pert -= 0.035 * math.sin(Dr)
-    E_pert -= 0.031 * math.sin(Mr + Msr)
-    E_pert -= 0.015 * math.sin(2*Fr - 2*Dr)
-    E_pert += 0.011 * math.sin(Mr - 4*Dr)
-    lonecl = (lonecl + E_pert) % 360
+    T = d / 36525.0
+    L0 = 218.31617 + 481267.88088 * T - 4.06 * T**2 / 3600.0
+    M = 134.96292 + 477198.86753 * T + 33.25 * T**2 / 3600.0
+    MSun = 357.52543 + 35999.04944 * T - 0.58 * T**2 / 3600.0
+    F = 93.27283 + 483202.01873 * T - 11.56 * T**2 / 3600.0
+    D = 297.85027 + 445267.11135 * T - 5.15 * T**2 / 3600.0
+
+    Delta = (22640 * math.sin(math.radians(M)) 
+             + 769 * math.sin(math.radians(2 * M)) 
+             - 4586 * math.sin(math.radians(M - 2 * D)) 
+             + 2370 * math.sin(math.radians(2 * D)) 
+             - 668 * math.sin(math.radians(MSun)) 
+             - 412 * math.sin(math.radians(2 * F)) 
+             - 125 * math.sin(math.radians(D)) 
+             - 212 * math.sin(math.radians(2 * M - 2 * D)) 
+             - 206 * math.sin(math.radians(M + MSun - 2 * D)) 
+             + 192 * math.sin(math.radians(M + 2 * D)) 
+             - 165 * math.sin(math.radians(MSun - 2 * D)) 
+             + 148 * math.sin(math.radians(L0 - MSun)) 
+             - 110 * math.sin(math.radians(M + MSun)) 
+             - 55 * math.sin(math.radians(2 * F - 2 * D))) / 3600.0
+
+    lonecl = (L0 + Delta) % 360
     return lonecl
 
 # Lahiri Ayanamsa approximation
@@ -98,7 +78,7 @@ def calculate_ayanamsa(jd):
 st.title("Vedic Astrology Fun Descriptor")
 
 birth_date = st.date_input("Birth Date", min_value=datetime.date(1900, 1, 1), max_value=datetime.date(2100, 12, 31))
-birth_time = st.time_input("Birth Time (Local)")
+birth_time = st.time_input("Birth Time (Local)", step=datetime.timedelta(minutes=1))
 timezones = sorted(zoneinfo.available_timezones())
 timezone = st.selectbox("Timezone", timezones, index=timezones.index("UTC") if "UTC" in timezones else 0)
 
