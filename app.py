@@ -220,7 +220,7 @@ fun_phrases = {
 }
 
 # Main app
-st.title("Super Vedic Astrology & Siddha Pakshi Prasna App 🔮🦅🌟")
+st.title("Divination by Mahaan 🔮🦅🌟")
 
 st.write("Enter your birth details to receive a combined Vedic Astrology fun descriptor and Siddha Pakshi Prasna divination. Birth time is local; select timezone for accurate UTC conversion. Place is for reference in divination output.")
 
